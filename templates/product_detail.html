@@ -1,0 +1,11 @@
+<!-- templates/product_detail.html -->
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ product.name }}</h1>
+    <p>Price: {{ product.price }}</p>
+    <img src="{{ url_for('static', filename='images/' ~ product.image_file) }}" alt="{{ product.name }}">
+    <p>Date Added: {{ product.date_added }}</p>
+</div>
+{% endblock %}
