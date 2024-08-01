@@ -1,113 +1,73 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const addTaskButton = document.getElementById("add-task-button");
-    const addTaskForm = document.getElementById("add-task-form");
-    const todayButton = document.getElementById("today-button");
-    const prevWeekButton = document.getElementById("prev-week");
-    const nextWeekButton = document.getElementById("next-week");
-    const dateSlider = document.getElementById("date-slider");
-    const monthYearDisplay = document.getElementById("month-year");
-    const openSidebarButton = document.getElementById("open-sidebar");
-    const closeSidebarButton = document.getElementById("close-sidebar");
-    const sidebar = document.getElementById("sidebar");
-    const mainContent = document.getElementById("main-content");
+// Jumbotron slideshow
+let slideIndex = 0;
+const slides = document.querySelectorAll('#jumbotron-slides img');
+const totalSlides = slides.length;
 
-    const today = new Date();
-    let currentStartDate = new Date(
-        today.setDate(today.getDate() - today.getDay() + 1)
-    );
+function showSlide(index) {
+    slides.forEach((slide, i) => {
+        slide.classList.toggle('hidden', i !== index);
+    });
+}
 
-    function formatDate(date) {
-        const options = { month: "short", day: "numeric", year: "numeric" };
-        return date.toLocaleDateString("en-US", options);
+function nextSlide() {
+    slideIndex = (slideIndex + 1) % totalSlides;
+    showSlide(slideIndex);
+}
+
+setInterval(nextSlide, 5000); // Change slide every 5 seconds
+
+// Initialize first slide
+showSlide(slideIndex);
+
+// Cart functionality
+llet cart = [];
+
+function addToCart(productId, productName, productPrice) {
+    const productInCart = cart.find(product => product.id === productId);
+    if (productInCart) {
+        productInCart.count++;
+    } else {
+        cart.push({ id: productId, name: productName, price: productPrice, count: 1 });
     }
+    updateCartCount();
+    updateCartDetails();
+}
 
-    function renderDates(startDate) {
-        dateSlider.innerHTML = "";
-        for (let i = 0; i < 7; i++) {
-            const date = new Date(startDate);
-            date.setDate(startDate.getDate() + i);
-            const isToday = isSameDate(date, new Date());
-            const dateItem = document.createElement("div");
-            dateItem.className = `date-item ${isToday ? 'today' : ''}`;
-            dateItem.dataset.date = date.toISOString().split("T")[0];
-            dateItem.innerHTML = `
-                <div class="day">${date.getDate()}</div>
-                <div class="weekday">${date.toLocaleDateString("en-US", { weekday: "short" })}</div>
-            `;
-            dateSlider.appendChild(dateItem);
-        }
-        updateMonthYearDisplay(startDate);
-    }
+function updateCartCount() {
+    const cartCountElement = document.getElementById('cart-count');
+    const totalItems = cart.reduce((sum, product) => sum + product.count, 0);
+    cartCountElement.textContent = totalItems;
+}
 
-    function updateWeek(offset) {
-        currentStartDate.setDate(currentStartDate.getDate() + offset);
-        renderDates(currentStartDate);
-    }
+function updateCartDetails() {
+    const cartDetailsElement = document.getElementById('cart-details');
+    cartDetailsElement.innerHTML = '';
+    let totalAmount = 0;
 
-    function updateMonthYearDisplay(date) {
-        const options = { year: "numeric", month: "long" };
-        monthYearDisplay.textContent = date.toLocaleDateString("en-US", options);
-    }
+    cart.forEach(product => {
+        const productTotal = product.price * product.count;
+        totalAmount += productTotal;
 
-    function fetchTasks(date) {
-        console.log(`Fetching tasks for date: ${date}`);
-    }
-
-    function isSameDate(date1, date2) {
-        return date1.getFullYear() === date2.getFullYear() &&
-               date1.getMonth() === date2.getMonth() &&
-               date1.getDate() === date2.getDate();
-    }
-
-    addTaskButton.addEventListener("click", () => {
-        addTaskForm.classList.toggle("hidden");
+        const productElement = document.createElement('div');
+        productElement.classList.add('flex', 'justify-between', 'mb-2');
+        productElement.innerHTML = `
+            <span>${product.name} x ${product.count}</span>
+            <span>Rp ${productTotal}</span>
+        `;
+        cartDetailsElement.appendChild(productElement);
     });
 
-    todayButton.addEventListener("click", () => {
-        currentStartDate = new Date(
-            today.setDate(today.getDate() - today.getDay() + 1)
-        );
-        renderDates(currentStartDate);
-    });
+    document.getElementById('total-amount').textContent = totalAmount;
+}
 
-    prevWeekButton.addEventListener("click", () => {
-        updateWeek(-7);
-    });
+function toggleCartModal() {
+    const cartModal = document.getElementById('cart-modal');
+    cartModal.style.display = (cartModal.style.display === 'none' || cartModal.style.display === '') ? 'block' : 'none';
+}
 
-    nextWeekButton.addEventListener("click", () => {
-        updateWeek(7);
-    });
-
-    dateSlider.addEventListener("click", (e) => {
-        if (e.target.closest(".date-item")) {
-            const selectedDate = e.target.closest(".date-item").dataset.date;
-            fetchTasks(selectedDate);
-        }
-    });
-
-    openSidebarButton.addEventListener("click", () => {
-        sidebar.classList.add("open");
-        mainContent.classList.remove("ml-0");
-        mainContent.classList.add("ml-64");
-    });
-
-    closeSidebarButton.addEventListener("click", () => {
-        sidebar.classList.remove("open");
-        mainContent.classList.remove("ml-64");
-        mainContent.classList.add("ml-0");
-    });
-
-    renderDates(currentStartDate);
+// Initial setup
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('cart-modal').style.display = 'none';
+    updateCartCount();
+    updateCartDetails();
 });
-
-
-document.getElementById('dark-mode-toggle').addEventListener('click', function() {
-    document.body.classList.toggle('dark');
-});
-
-document.getElementById('add-task-button').addEventListener('click', function() {
-    var form = document.getElementById('add-task-form');
-    form.classList.toggle('hidden');
-});
-
-AOS.init();

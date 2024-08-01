@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}My Site{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
         body, html {
@@ -46,7 +45,10 @@
                 <a href="{{ url_for('auth.login') }}" class="text-white"><i class="fas fa-sign-in-alt mr-2"></i>Login</a>
                 <a href="{{ url_for('auth.register') }}" class="text-white"><i class="fas fa-user-plus mr-2"></i>Register</a>
             {% endif %}
-            <a href="{{ url_for('shop.home') }}" class="text-white"><i class="fas fa-shopping-cart mr-2"></i>Cart</a>
+            <a href="#" onclick="toggleCartModal()" class="text-white relative">
+                <i class="fas fa-shopping-cart"></i>
+                <span id="cart-count" class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">0</span>
+            </a>
         </div>
     </nav>
 
@@ -57,9 +59,65 @@
         </div>
     </div>
 
-    <!-- Footer (optional) -->
-    <footer class="bg-gray-800 text-white text-center py-4 mt-8">
-        &copy; 2023 My Shop. All Rights Reserved.
-    </footer>
+    <!-- Cart Modal -->
+    <div id="cart-modal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center hidden">
+        <div class="bg-white p-4 rounded-lg max-w-lg w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Your Cart</h2>
+                <button onclick="toggleCartModal()" class="text-red-500"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="cart-details" class="mb-4">
+                <!-- Cart items will be injected here by JavaScript -->
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-lg font-bold">Total: Rp <span id="total-amount">0</span></span>
+                <button class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Checkout</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let cart = [];
+
+        function addToCart(productId, productName, productPrice) {
+            const productInCart = cart.find(product => product.id === productId);
+            if (productInCart) {
+                productInCart.count++;
+            } else {
+                cart.push({ id: productId, name: productName, price: productPrice, count: 1 });
+            }
+            updateCartCount();
+            updateCartDetails();
+        }
+
+        function updateCartCount() {
+            const cartCountElement = document.getElementById('cart-count');
+            const totalItems = cart.reduce((sum, product) => sum + product.count, 0);
+            cartCountElement.textContent = totalItems;
+        }
+
+        function updateCartDetails() {
+            const cartDetailsElement = document.getElementById('cart-details');
+            cartDetailsElement.innerHTML = '';
+            let totalAmount = 0;
+
+            cart.forEach(product => {
+                totalAmount += product.price * product.count;
+                cartDetailsElement.innerHTML += `
+                    <div class="flex justify-between items-center mb-2">
+                        <span>${product.name} x${product.count}</span>
+                        <span>Rp ${product.price * product.count}</span>
+                    </div>
+                `;
+            });
+
+            document.getElementById('total-amount').textContent = totalAmount;
+        }
+
+        function toggleCartModal() {
+            const cartModal = document.getElementById('cart-modal');
+            cartModal.classList.toggle('hidden');
+        }
+    </script>
 </body>
 </html>
