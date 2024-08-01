@@ -23,8 +23,76 @@
         .navbar a {
             color: white;
         }
-        .navbar .navbar-brand {
+        .navbar .cart-icon {
+            position: relative;
+        }
+        .navbar .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: red;
+            color: white;
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 50%;
+        }
+        .modal-background {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.75);
+            z-index: 50;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-background.active {
+            display: flex;
+        }
+        .modal-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-header h2 {
             font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .modal-header button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .modal-body {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .modal-body .cart-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eaeaea;
+            padding-bottom: 10px;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -32,9 +100,11 @@
     <!-- Navbar -->
     <nav class="navbar flex items-center justify-between px-4 fixed w-full top-0 shadow-md z-10">
         <div class="flex items-center">
-            <a href="{{ url_for('shop.home') }}" class="navbar-brand">My Shop</a>
+            <a href="{{ url_for('shop.home') }}" class="navbar-brand text-white text-2xl">
+                <i class="fas fa-store"></i>
+            </a>
         </div>
-        <div class="flex items-center space-x-4">
+        <div class="hidden md:flex items-center space-x-4">
             {% if current_user.is_authenticated %}
                 <span class="text-white">Hello, {{ current_user.username }}!</span>
                 {% if current_user.is_admin %}
@@ -45,12 +115,39 @@
                 <a href="{{ url_for('auth.login') }}" class="text-white"><i class="fas fa-sign-in-alt mr-2"></i>Login</a>
                 <a href="{{ url_for('auth.register') }}" class="text-white"><i class="fas fa-user-plus mr-2"></i>Register</a>
             {% endif %}
-            <a href="#" onclick="toggleCartModal()" class="text-white relative">
-                <i class="fas fa-shopping-cart"></i>
-                <span id="cart-count" class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">0</span>
-            </a>
+            <div class="cart-icon relative">
+                <a href="javascript:void(0)" onclick="toggleCartModal()" class="text-white">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cart-count" class="cart-count">0</span>
+                </a>
+            </div>
+        </div>
+        <div class="md:hidden">
+            <button id="mobile-menu-button" class="text-white">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
         </div>
     </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-gray-700 text-white fixed inset-0 top-16 pt-4 px-4 space-y-4 z-20">
+        {% if current_user.is_authenticated %}
+            <span class="block">Hello, {{ current_user.username }}!</span>
+            {% if current_user.is_admin %}
+                <a href="{{ url_for('admin.admin_dashboard') }}" class="block"><i class="fas fa-user-shield mr-2"></i>Admin</a>
+            {% endif %}
+            <a href="{{ url_for('auth.logout') }}" class="block"><i class="fas fa-sign-out-alt mr-2"></i>Logout</a>
+        {% else %}
+            <a href="{{ url_for('auth.login') }}" class="block"><i class="fas fa-sign-in-alt mr-2"></i>Login</a>
+            <a href="{{ url_for('auth.register') }}" class="block"><i class="fas fa-user-plus mr-2"></i>Register</a>
+        {% endif %}
+        <div class="cart-icon relative">
+            <a href="javascript:void(0)" onclick="toggleCartModal()" class="block">
+                <i class="fas fa-shopping-cart"></i>
+                <span id="cart-count-mobile" class="cart-count">0</span>
+            </a>
+        </div>
+    </div>
 
     <!-- Main Content Wrapper -->
     <div class="content-wrapper pt-16">
@@ -60,24 +157,62 @@
     </div>
 
     <!-- Cart Modal -->
-    <div id="cart-modal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center hidden">
-        <div class="bg-white p-4 rounded-lg max-w-lg w-full">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold">Your Cart</h2>
-                <button onclick="toggleCartModal()" class="text-red-500"><i class="fas fa-times"></i></button>
+    <div id="cart-modal" class="modal-background">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>Your Cart</h2>
+                <button onclick="toggleCartModal()">&times;</button>
             </div>
-            <div id="cart-details" class="mb-4">
+            <div class="modal-body" id="cart-details">
                 <!-- Cart items will be injected here by JavaScript -->
             </div>
-            <div class="flex justify-between items-center">
+            <div class="modal-footer">
                 <span class="text-lg font-bold">Total: Rp <span id="total-amount">0</span></span>
-                <button class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Checkout</button>
+                <button onclick="showPaymentModal()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Checkout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Confirmation Modal -->
+    <div id="payment-modal" class="modal-background">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>Confirm Payment</h2>
+                <button onclick="togglePaymentModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Please choose your payment method:</p>
+                <div class="mt-4">
+                    <button onclick="selectPaymentMethod('whatsapp')" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">WhatsApp</button>
+                    <button onclick="selectPaymentMethod('transfer')" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 ml-2">Transfer</button>
+                    <button onclick="selectPaymentMethod('qris')" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 ml-2">QRIS</button>
+                </div>
+                <div id="additional-info-form" class="mt-4 hidden">
+                    <h3 class="text-lg font-bold mb-2">Enter Additional Information</h3>
+                    <input id="user-name" type="text" class="w-full px-4 py-2 border rounded mb-2" placeholder="Your Name">
+                    <input id="user-address" type="text" class="w-full px-4 py-2 border rounded mb-2" placeholder="Your Address">
+                    <input id="delivery-time" type="text" class="w-full px-4 py-2 border rounded mb-2" placeholder="Preferred Delivery Time">
+                    <input id="user-email" type="text" class="w-full px-4 py-2 border rounded mb-2" placeholder="Email" value="{{ current_user.email }}" readonly>
+                </div>
+            </div>
+            <div class="modal-footer mt-4">
+                <button onclick="confirmPayment()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Confirm</button>
             </div>
         </div>
     </div>
 
     <script>
+        // Toggle mobile menu visibility
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Cart logic (same as previous implementation)
         let cart = [];
+        let selectedPaymentMethod = '';
 
         function addToCart(productId, productName, productPrice) {
             const productInCart = cart.find(product => product.id === productId);
@@ -92,8 +227,10 @@
 
         function updateCartCount() {
             const cartCountElement = document.getElementById('cart-count');
+            const cartCountElementMobile = document.getElementById('cart-count-mobile');
             const totalItems = cart.reduce((sum, product) => sum + product.count, 0);
             cartCountElement.textContent = totalItems;
+            cartCountElementMobile.textContent = totalItems;
         }
 
         function updateCartDetails() {
@@ -104,7 +241,7 @@
             cart.forEach(product => {
                 totalAmount += product.price * product.count;
                 cartDetailsElement.innerHTML += `
-                    <div class="flex justify-between items-center mb-2">
+                    <div class="cart-item">
                         <span>${product.name} x${product.count}</span>
                         <span>Rp ${product.price * product.count}</span>
                     </div>
@@ -116,8 +253,76 @@
 
         function toggleCartModal() {
             const cartModal = document.getElementById('cart-modal');
-            cartModal.classList.toggle('hidden');
+            cartModal.classList.toggle('active');
+        }
+
+        function showPaymentModal() {
+            toggleCartModal();  // Close cart modal
+            togglePaymentModal();  // Open payment modal
+        }
+
+        function togglePaymentModal() {
+            const paymentModal = document.getElementById('payment-modal');
+            paymentModal.classList.toggle('active');
+        }
+
+        function selectPaymentMethod(method) {
+            selectedPaymentMethod = method;
+            if (method === 'whatsapp') {
+                document.getElementById('additional-info-form').classList.remove('hidden');
+            } else {
+                document.getElementById('additional-info-form').classList.add('hidden');
+            }
+        }
+
+        function confirmPayment() {
+            // Check if the user is authenticated
+            const currentUserEmail = "{{ current_user.email }}"; // Django Template Syntax
+            if (!currentUserEmail) {
+                alert('You need to be logged in to checkout.');
+                window.location.href = "{{ url_for('auth.login') }}";
+                return;
+            }
+
+            if (selectedPaymentMethod === 'whatsapp') {
+                const name = document.getElementById('user-name').value;
+                const address = document.getElementById('user-address').value;
+                const deliveryTime = document.getElementById('delivery-time').value;
+                const email = document.getElementById('user-email').value;
+
+                if (!name || !address || !deliveryTime || !email) {
+                    alert('Please enter all required information.');
+                    return;
+                }
+
+                saveAddressToDatabase(name, address, deliveryTime, email);
+                const message = generateWhatsAppMessage(name, address, deliveryTime, email);
+                const phoneNumber = '+6281297444258'; // WhatsApp phone number
+                const encodedMessage = encodeURIComponent(message);
+                window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
+            } else {
+                alert('Payment method not implemented.');
+            }
+        }
+
+        function generateWhatsAppMessage(name, address, deliveryTime, email) {
+            let message = `Hello, I would like to place an order.\n\nItems:\n`;
+            cart.forEach(product => {
+                message += `${product.name} x${product.count} - Rp ${product.price * product.count}\n`;
+            });
+            message += `\nTotal: Rp ${document.getElementById('total-amount').textContent}\n\n`;
+            message += `Name: ${name}\n`;
+            message += `Email: ${email}\n`;
+            message += `Address: ${address}\n`;
+            message += `Preferred Delivery Time: ${deliveryTime}\n\n`;
+            message += `Payment Method: ${selectedPaymentMethod.toUpperCase()}`;
+            return message;
+        }
+
+        function saveAddressToDatabase(name, address, deliveryTime, email) {
+            // Add your AJAX call here to save the information to the database
         }
     </script>
+    
 </body>
 </html>
