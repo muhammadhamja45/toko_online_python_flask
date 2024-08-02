@@ -10,7 +10,26 @@
         <img class="w-full h-full object-cover" src="https://i.pinimg.com/originals/a0/a4/25/a0a4253553cbbdee55a718f3a01f2e1d.jpg" alt="Slide 1">
         <img class="w-full h-full object-cover hidden" src="https://i.pinimg.com/originals/d6/b1/4b/d6b14bd293e9530a99de49d5017a0c50.jpg" alt="Slide 2">
         <img class="w-full h-full object-cover hidden" src="https://i.pinimg.com/originals/8a/01/3e/8a013efaea397aa681f8effa6cfaf52f.jpg" alt="Slide 3">
-        
+    </div>
+</div>
+
+<!-- Card Section Below Jumbotron -->
+<div class="container mx-auto mt-8 px-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Card 1 -->
+        <div class="relative group overflow-hidden h-64 md:h-70">
+            <img class="w-full h-full object-cover" src="https://i.pinimg.com/originals/a0/a4/25/a0a4253553cbbdee55a718f3a01f2e1d.jpg" alt="Card Image 1">
+            <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
+                <span class="text-white text-2xl md:text-3xl font-bold">Card 1 Title</span>
+            </div>
+        </div>
+        <!-- Card 2 -->
+        <div class="relative group overflow-hidden h-64 md:h-70">
+            <img class="w-full h-full object-cover" src="https://i.pinimg.com/originals/d6/b1/4b/d6b14bd293e9530a99de49d5017a0c50.jpg" alt="Card Image 2">
+            <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
+                <span class="text-white text-2xl md:text-3xl font-bold">Card 2 Title</span>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -36,6 +55,49 @@
         {% endfor %}
     </div>
 </div>
+
+ <!-- Footer -->
+<footer class="bg-gray-800 text-white mt-8">
+    <div class="container mx-auto py-8 px-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Quick Links -->
+            <div>
+                <h2 class="text-lg font-bold mb-4">Quick Links</h2>
+                <ul>
+                    <li><a href="" class="text-gray-400 hover:text-white">Home</a></li>
+                    <li><a href="" class="text-gray-400 hover:text-white">Products</a></li>
+                    <li><a href="" class="text-gray-400 hover:text-white">About Us</a></li>
+                    <li><a href="" class="text-gray-400 hover:text-white">Contact</a></li>
+                </ul>
+            </div>
+
+            <!-- Contact Information -->
+            <div>
+                <h2 class="text-lg font-bold mb-4">Contact Information</h2>
+                <p class="text-gray-400">123 Main Street</p>
+                <p class="text-gray-400">City, Country</p>
+                <p class="text-gray-400">Phone: (123) 456-7890</p>
+                <p class="text-gray-400">Email: info@example.com</p>
+            </div>
+
+            <!-- Social Media -->
+            <div>
+                <h2 class="text-lg font-bold mb-4">Follow Us</h2>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook fa-lg"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter fa-lg"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram fa-lg"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-linkedin fa-lg"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center text-gray-400">
+            &copy; 2023 My Shop. All rights reserved.
+        </div>
+    </div>
+</footer>
+
 <script>
     // Jumbotron slideshow
     let slideIndex = 0;
